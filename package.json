@@ -1,0 +1,20 @@
+{
+  "name": "nodescraper",
+  "version": "0.0.0",
+  "description": "Testing NodeJS scraping technique",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/zorrodg/node-scraper.git"
+  },
+  "author": "Andres Zorro <zorrodg@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zorrodg/node-scraper/issues"
+  },
+  "devDependencies": {
+    "express": "~4.10.2",
+    "request": "~2.47.0",
+    "cheerio": "~0.18.0"
+  }
+}
