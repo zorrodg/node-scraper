@@ -15,6 +15,7 @@
   "devDependencies": {
     "express": "~4.10.2",
     "request": "~2.47.0",
-    "cheerio": "~0.18.0"
+    "cheerio": "~0.18.0",
+    "node-phantom": "~0.2.5"
   }
 }
