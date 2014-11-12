@@ -1,37 +1,47 @@
-(function(){
-  var server = require('express')(),
-      request = require('request'),
-      cheerio = require('cheerio'),
-      //phantom = require('node-phantom'),
-      fs = require('fs');
+var server = require('express')(),
+    request = require('request'),
+    cheerio = require('cheerio'),
+    Entities = require('html-entities').AllHtmlEntities,
+    entities = new Entities(),
+    fs = require('fs');
 
-  server.get('/scrape', function(req, res) {
-    // URL to scrape
-    var url = 'http://www.sitp.gov.co/publicaciones/ruta_56a_boita_teusaquillo_pub',
-      $, esquemaRuta;
+server.get('/scrape', function(req, res) {
+  // URL to scrape
+  var url = req.query.url,
+    $, esquemaRuta;
 
-    request(url, function(error, response, html) {
-      // Check for errors
-      if(!error){
-        $ = cheerio.load(html, {
-          normalizeWhitespace: false,
-          xmlMode: false,
-          decodeEntities: true
-        });
-        esquemaRuta = $('#texto_principal')
-          .children('table:first-child')
-          .children('tbody').children('tr:last-child')
-          .find('.azulBold + span')
-          .html();
-      }
+  if(!url) return res.send('No url');
 
-      res.send(esquemaRuta);
+  request(url, function(error, response, html) {
+    // Check for errors
+    if(!error){
+      $ = cheerio.load(html, {
+        normalizeWhitespace: false,
+        xmlMode: false,
+        decodeEntities: true
+      });
+      esquemaRuta = $('#texto_principal')
+        .find('tr:last-child')
+        .find('.azulBold').parent()
+        .html();
+    }
+
+    esquemaRuta = entities.decode(esquemaRuta)
+      .replace(/(<([^>]+)>)/ig, '')
+      .replace('Esquema de ruta: ', '')
+      .replace(/^\s*/g, '')
+      .replace(/,\s+/g, ',')
+      .replace(/.$/, '')
+      .split(',');
+      
+    res.set({
+      'Content-Type': 'application/json',
     });
+    res.send(esquemaRuta);
   });
+});
 
-  server.listen('3000');
-  console.log('Servidor iniciado en 3000');
+server.listen('3000');
+console.log('Servidor iniciado en 3000');
 
-  exports = module.exports = server;
-
-})();
+exports = module.exports = server;
