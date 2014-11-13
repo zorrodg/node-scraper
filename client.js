@@ -1,5 +1,8 @@
-var page = require('webpage').create();
-page.open('http://localhost:3000/scrape?url=' + encodeURI('http://www.sitp.gov.co/publicaciones/ruta_56a_boita_teusaquillo_pub'), 
-  function() {
-    phantom.exit();
-  });
+var pageList = require('./rutas.json'),
+  request = require('request');
+
+for(var i = 0, len = pageList.length; i < len; i++){
+  console.log('Scraping ' + pageList[i]);
+  request('http://localhost:3000/scrape?url=' + encodeURI(pageList[i]));
+}
+

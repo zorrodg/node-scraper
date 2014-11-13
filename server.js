@@ -8,7 +8,7 @@ var server = require('express')(),
 server.get('/scrape', function(req, res) {
   // URL to scrape
   var url = req.query.url,
-    $, esquemaRuta;
+    $, esquemaRuta, ruta, titulo;
 
   if(!url) return res.send('No url');
 
@@ -20,26 +20,36 @@ server.get('/scrape', function(req, res) {
         xmlMode: false,
         decodeEntities: true
       });
+      ruta = $('h1.pub').text();
+
       esquemaRuta = $('#texto_principal')
         .find('tr:last-child')
         .find('.azulBold').parent()
         .html();
     }
 
-    esquemaRuta = entities.decode(esquemaRuta)
+    esquemaRuta = purify(esquemaRuta);
+    titulo = ruta.toLowerCase().replace('-', '').replace(/\s+/g, '_');
+
+    console.log(ruta);
+    
+    fs.writeFile('output/' + titulo + '.json', JSON.stringify({
+      ruta: ruta,
+      esquema: esquemaRuta
+    }));
+    res.send(esquemaRuta);
+  });
+});
+
+function purify(node) {
+  return entities.decode(node)
       .replace(/(<([^>]+)>)/ig, '')
       .replace('Esquema de ruta: ', '')
       .replace(/^\s*/g, '')
       .replace(/,\s+/g, ',')
       .replace(/.$/, '')
       .split(',');
-      
-    res.set({
-      'Content-Type': 'application/json',
-    });
-    res.send(esquemaRuta);
-  });
-});
+}
 
 server.listen('3000');
 console.log('Servidor iniciado en 3000');
