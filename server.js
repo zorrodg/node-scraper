@@ -42,30 +42,51 @@ server.get('/end', function(req,res){
 });
 
 function purify(node) {
+  if(!node) return '';
+
   return entities.decode(node)
       .replace(/(<([^>]+)>)/ig, '')
-      .replace('Esquema de ruta: ', '')
+      .replace(/(e|E)squema de ruta:/, '')
       .replace(/^\s*/g, '')
       .replace(/,\s+/g, ',')
-      .replace(/\.$/, '');
+      .replace(/\.\s?$/, '');
 }
 
 function detail($){
-  var esquemaRuta, ruta, titulo;
+  var esquemaRuta, ruta, titulo, id, horario, horas;
 
   ruta = $('h1.pub').text();
   esquemaRuta = $('#texto_principal')
-    .find('tr:last-child')
+    .children('table:first-child')
     .find('.azulBold').parent()
     .html();
+  horario = $('#texto_principal')
+    .children('table:last-child')
+    .find('tr > td:last-child')
+    .html();
 
+  id = ruta.match(/\s([A-Z0-9]{1,5}):?\s/)[1];
   ruta = purify(ruta);
   esquemaRuta = purify(esquemaRuta).split(',');
   titulo = ruta.toLowerCase().replace('-', '').replace(/\s+/g, '_');
+  horas = purify(horario).match(/([0-9]{1,2}:[0-9]{2} a?p?\.m\.?) a ([0-9]{1,2}:[0-9]{2} a?p?\.m\.?)/g);
   
+  if(horas.length > 1){
+    horario = {
+      lun_sab: horas[0].replace(/\sa\s/, ' - '),
+      dom_fes: horas[1].replace(/\sa\s/, ' - ')
+    }
+  } else {
+    horario = {
+      lun_dom: horas[0].replace(/\sa\s/, ' - ')
+    }
+  }
+
   fs.writeFile('output/' + titulo + '.json', JSON.stringify({
+    id: id,
     ruta: ruta,
-    esquema: esquemaRuta
+    esquema: esquemaRuta,
+    horario: horario
   }));
 }
 
