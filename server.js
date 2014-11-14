@@ -2,6 +2,7 @@ var server = require('express')(),
     request = require('request'),
     cheerio = require('cheerio'),
     Entities = require('html-entities').AllHtmlEntities,
+    //diacritics = require('diacritics').remove,
     entities = new Entities(),
     fs = require('fs'),
     app,
@@ -26,7 +27,7 @@ server.get('/scrape', function(req, res) {
 
       switch(type){
         case 'detail':
-          detail($);
+          detail($, url);
           break;
       }
 
@@ -49,13 +50,13 @@ function purify(node) {
       .replace(/(e|E)squema de ruta:/, '')
       .replace(/^\s*/g, '')
       .replace(/,\s+/g, ',')
-      .replace(/\.\s?$/, '');
+      .replace(/\.(\.|\s)*?$/g, '');
 }
 
-function detail($){
+function detail($, url){
   var esquemaRuta, ruta, titulo, id, horario, horas;
 
-  ruta = $('h1.pub').text();
+  ruta = $('h1.pub').html();
   esquemaRuta = $('#texto_principal')
     .children('table:first-child')
     .find('.azulBold').parent()
@@ -67,18 +68,18 @@ function detail($){
 
   id = ruta.match(/\s([A-Z0-9]{1,5}):?\s/)[1];
   ruta = purify(ruta);
-  esquemaRuta = purify(esquemaRuta).split(',');
-  titulo = ruta.toLowerCase().replace('-', '').replace(/\s+/g, '_');
+  esquemaRuta = purify(esquemaRuta).replace(/\sy\s/, ',').split(',');
+  titulo = url.replace('http://www.sitp.gov.co/publicaciones/', '').replace('_pub', '').replace(':', '');
   horas = purify(horario).match(/([0-9]{1,2}:[0-9]{2} a?p?\.m\.?) a ([0-9]{1,2}:[0-9]{2} a?p?\.m\.?)/g);
   
   if(horas.length > 1){
     horario = {
-      lun_sab: horas[0].replace(/\sa\s/, ' - '),
-      dom_fes: horas[1].replace(/\sa\s/, ' - ')
+      lun_sab: horas[0].replace(/\sa\s/, ' - ').replace(/\./g, ''),
+      dom_fes: horas[1].replace(/\sa\s/, ' - ').replace(/\./g, '')
     }
   } else {
     horario = {
-      lun_dom: horas[0].replace(/\sa\s/, ' - ')
+      lun_dom: horas[0].replace(/\sa\s/, ' - ').replace(/\./g, '')
     }
   }
 

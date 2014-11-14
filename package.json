@@ -17,6 +17,7 @@
     "request": "~2.47.0",
     "cheerio": "~0.18.0",
     "node-phantom": "~0.2.5",
-    "html-entities": "^1.1.1"
+    "html-entities": "^1.1.1",
+    "diacritics": "~1.2.1"
   }
 }
