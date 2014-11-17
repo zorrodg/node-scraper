@@ -31,10 +31,13 @@ module.exports = function($, url){
     }
   }
 
-  fs.writeFile('output/' + titulo + '.json', JSON.stringify({
+  fs.writeFile('./output/' + titulo + '.json', JSON.stringify({
     id: id,
     ruta: ruta,
     esquema: esquemaRuta,
     horario: horario
-  }));
+  }), function(err) {
+    if(err) throw err;
+    console.log('Escrito '+ titulo + '.json')
+  });
 }
