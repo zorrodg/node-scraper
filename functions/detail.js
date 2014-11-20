@@ -19,7 +19,7 @@ module.exports = function($, url){
     ruta = purify(ruta);
     console.log('Leyendo %s', ruta);
 
-    id = ruta.match(/R?r?uta( Nocturna)? ([A-Z0-9]{1,5}):?/)[2];
+    id = ruta.match(/R?r?uta( Nocturna| Urbana)? ([A-Z0-9]{1,5}):?/)[2];
     esquemaRuta = purify(esquemaRuta).replace(/\sy\s/, ',').split(',');
     horas = purify(horario).match(/([0-9]{1,2}:[0-9]{2} a?p?\.m\.?) a ([0-9]{1,2}:[0-9]{2} a?p?\.m\.?)/g);
     

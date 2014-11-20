@@ -2,10 +2,7 @@ var server = require('express')(),
     request = require('request'),
     cheerio = require('cheerio'),
     detail = require('./functions/detail'),
-    list = require('./functions/list'),
-    Entities = require('html-entities').XmlEntities,
-    entities = new Entities(),
-    app;
+    list = require('./functions/list');
 
 server.get('/scrape/:type', function(req, res) {
   var url = req.param('url'),
@@ -20,7 +17,6 @@ server.get('/scrape/:type', function(req, res) {
     var $, promise;
     // Check for errors
     if(!error){
-      //html = entities.decode(html);
       $ = cheerio.load(html, {
         normalizeWhitespace: false,
         xmlMode: false,
@@ -51,7 +47,7 @@ server.get('/end', function(req,res){
   return app && app.close();
 });
 
-app = server.listen('3000');
+server.listen('3000');
 console.log('Servidor iniciado en 3000');
 
 require('./scrape')();
