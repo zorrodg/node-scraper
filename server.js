@@ -3,6 +3,8 @@ var server = require('express')(),
     cheerio = require('cheerio'),
     detail = require('./functions/detail'),
     list = require('./functions/list'),
+    Entities = require('html-entities').XmlEntities,
+    entities = new Entities(),
     app;
 
 server.get('/scrape/:type', function(req, res) {
@@ -11,10 +13,14 @@ server.get('/scrape/:type', function(req, res) {
   // URL to scrape
   if(!url) return res.send('No url');
 
-  request(url, function(error, response, html) {
-    var $;
+  request({
+    url:url,
+    encoding: 'binary'
+  }, function(error, response, html) {
+    var $, promise;
     // Check for errors
     if(!error){
+      //html = entities.decode(html);
       $ = cheerio.load(html, {
         normalizeWhitespace: false,
         xmlMode: false,
@@ -23,14 +29,18 @@ server.get('/scrape/:type', function(req, res) {
 
       switch(type){
         case 'list':
-          list($, url);
+          promise = list($, url);
           break;
         case 'detail':
-          detail($, url);
+          promise = detail($, url);
           break;
       }
 
-      res.send('Done');
+      promise.then(function(){
+        res.send('Done');
+      }, function(){
+        res.send('Error');
+      }); 
     }
 
   });
@@ -38,7 +48,7 @@ server.get('/scrape/:type', function(req, res) {
 
 server.get('/end', function(req,res){
   res.send('Finish');
-  app && app.close();
+  return app && app.close();
 });
 
 app = server.listen('3000');

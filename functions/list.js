@@ -1,10 +1,10 @@
 var fs = require('fs'),
   purify = require('./purify'),
-  diacritic = require('diacritic');
+  Q = require('q');
 
 module.exports = function($, url){
   var todas = $('#cssmenu > ul > li'), 
-    seccion, rutas, ruta, urlRuta, arrayFinal = [];
+    seccion, rutas, ruta, urlRuta, arrayFinal = [], q = Q.defer();
 
   console.log('Iniciando listado de rutas...');
 
@@ -12,22 +12,27 @@ module.exports = function($, url){
     seccion = $(todas[i]);
     rutas = seccion.find('ul > li');
     for(var j = 0, len2 = rutas.length; j < len2; j++){
-      ruta = purify($(rutas[j]).html());
-      urlRuta = ruta
-        .toLowerCase()
-        .replace(/[>.:]/g, '')
-        .replace(' - ', ' ')
-        .replace(' – ', '')
-        .replace(/\s/g, '_');
-      urlRuta = 'http://www.sitp.gov.co/publicaciones/' + diacritic.clean(urlRuta) + '_pub';
+      idRuta = $(rutas[j]).find('a').attr('href');
+      // urlRuta = ruta
+      //   .toLowerCase()
+      //   .replace(/[>.:]/g, '')
+      //   .replace(' - ', ' ')
+      //   .replace(' – ', '')
+      //   .replace(/\s/g, '_');
+      urlRuta = 'http://www.sitp.gov.co/publicaciones/' + idRuta;
       console.log(urlRuta);
-      arrayFinal.push(urlRuta);
+      if(idRuta){
+        arrayFinal.push(urlRuta);
+      }
     }
   }
 
-  console.log('Escribiendo archivo de rutas...')
-  return fs.writeFile('./rutas.json', JSON.stringify(arrayFinal), function(err){
+  console.log('Escribiendo archivo de rutas...');
+  fs.writeFile('./rutas.json', JSON.stringify(arrayFinal), function(err){
     if(err) throw err;
-    return console.log('Archivo escrito!');
+    console.log('Archivo escrito!');
+    q.resolve(true);
   });
-}
+
+  return q.promise;
+};
